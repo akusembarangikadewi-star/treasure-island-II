@@ -4,243 +4,205 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Island Survival & Kraken Awakening</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Outfit', sans-serif;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: manipulation;
-        }
-        .pixel-font {
-            font-family: 'Press Start 2P', monospace;
-        }
-        .game-canvas-container {
-            position: relative;
-            width: 100%;
-            max-width: 900px;
-            aspect-ratio: 16 / 9;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-        /* Custom UI overlays */
-        .modal-bg {
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(4px);
-        }
-        .custom-btn {
-            transition: all 0.15s ease;
-            box-shadow: 0 4px 0 #0f172a;
-        }
-        .custom-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 #0f172a;
-        }
-    </style>
-</head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col items-center justify-between p-2 sm:p-4 overflow-x-hidden">
+    </head>
+<body>
 
-    <!-- Top Header -->
-    <header class="w-full max-w-4xl flex items-center justify-between mb-2">
-        <div class="flex items-center gap-3">
-            <span class="text-2xl sm:text-3xl">🏝️</span>
+    <!-- Header -->
+    <header>
+        <div class="brand-container">
+            <span class="brand-icon">🏝️</span>
             <div>
-                <h1 class="pixel-font text-xs sm:text-sm md:text-base text-amber-400 font-bold tracking-wide">ISLAND SURVIVAL</h1>
-                <p class="text-xs text-slate-400 hidden sm:block">Chop trees, build shelter & construct a ship to escape!</p>
+                <h1 class="pixel-font brand-title">ISLAND SURVIVAL</h1>
+                <p class="brand-sub">Chop trees, build a shelter & construct a ship to escape!</p>
             </div>
         </div>
-        <div class="flex items-center gap-2">
-            <button onclick="toggleDevTools()" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-slate-700 text-xs flex items-center gap-1">
-                💻 <span class="hidden sm:inline">DevTools</span>
+        <div class="header-buttons">
+            <button onclick="toggleDevTools()" class="btn">
+                💻 <span>DevTools</span>
             </button>
-            <button onclick="toggleHelpModal()" class="px-2 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded font-bold text-xs">
-                ❓ How to Play
+            <button onclick="toggleHelpModal()" class="btn btn-amber">
+                ❓ Guide
             </button>
         </div>
     </header>
 
-    <!-- Game Viewport Container -->
-    <main class="game-canvas-container bg-slate-900 rounded-xl overflow-hidden border-2 border-slate-700 relative">
-        <canvas id="gameCanvas" class="w-full h-full block bg-sky-900"></canvas>
+    <!-- Main Game Viewport -->
+    <main class="game-canvas-container">
+        <canvas id="gameCanvas"></canvas>
 
         <!-- HUD / Stats Overlay -->
-        <div class="absolute top-2 left-2 right-2 flex flex-wrap justify-between items-center pointer-events-none gap-2">
+        <div class="hud-overlay">
             <!-- Health & Hunger Bars -->
-            <div class="flex flex-col gap-1.5 bg-slate-900/90 border border-slate-700/80 p-2 rounded-lg backdrop-blur pointer-events-auto min-w-[140px] sm:min-w-[180px]">
-                <!-- Health -->
-                <div class="flex items-center justify-between text-xs font-bold gap-2">
-                    <span class="text-red-400 flex items-center gap-1">❤️ HP</span>
-                    <span id="NOHE" class="text-slate-200">100</span>
+            <div class="hud-card">
+                <div class="hud-row">
+                    <span style="color: #f87171;">❤️ HP</span>
+                    <span id="NOHE" style="color: #f1f5f9;">100</span>
                 </div>
-                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden border border-slate-700">
-                    <div id="hpBar" class="bg-gradient-to-r from-red-600 to-red-400 h-full w-full transition-all duration-300"></div>
+                <div class="hud-bar-bg">
+                    <div id="hpBar" class="hud-bar-fill bar-hp"></div>
                 </div>
-                <!-- Hunger -->
-                <div class="flex items-center justify-between text-xs font-bold gap-2">
-                    <span class="text-amber-400 flex items-center gap-1">🍖 Hunger</span>
-                    <span id="NOH" class="text-slate-200">100</span>
+
+                <div class="hud-row">
+                    <span style="color: #fbbf24;">🍖 Hunger</span>
+                    <span id="NOH" style="color: #f1f5f9;">100</span>
                 </div>
-                <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden border border-slate-700">
-                    <div id="hungerBar" class="bg-gradient-to-r from-amber-600 to-amber-400 h-full w-full transition-all duration-300"></div>
+                <div class="hud-bar-bg">
+                    <div id="hungerBar" class="hud-bar-fill bar-hunger"></div>
                 </div>
             </div>
 
             <!-- Inventory Quick Bar -->
-            <div class="flex items-center gap-3 bg-slate-900/90 border border-slate-700/80 px-3 py-2 rounded-lg backdrop-blur pointer-events-auto">
-                <div class="flex items-center gap-1.5" title="Logs collected">
-                    <span class="text-base sm:text-xl">🪵</span>
-                    <span id="NOL" class="font-mono text-sm sm:text-base font-bold text-amber-200">0</span>
+            <div class="inventory-card">
+                <div class="inv-item" title="Logs collected">
+                    <span>🪵</span>
+                    <span id="NOL" style="color: #fde68a;">0</span>
                 </div>
-                <div class="h-5 w-px bg-slate-700"></div>
-                <div class="flex items-center gap-1.5" title="Apples (Food)">
-                    <span class="text-base sm:text-xl">🍎</span>
-                    <span id="NOA" class="font-mono text-sm sm:text-base font-bold text-red-300">0</span>
+                <div class="inv-divider"></div>
+                <div class="inv-item" title="Apples (Food)">
+                    <span>🍎</span>
+                    <span id="NOA" style="color: #fca5a5;">0</span>
                 </div>
             </div>
         </div>
 
         <!-- Kraken Boss Health (Level 2) -->
-        <div id="krakenBarContainer" class="absolute top-16 left-1/2 -translate-x-1/2 w-3/4 max-w-md bg-slate-900/90 border border-red-800 p-2 rounded-lg backdrop-blur pointer-events-auto hidden flex-col gap-1 text-center">
-            <div class="flex justify-between items-center text-xs font-bold text-red-400">
+        <div id="krakenBarContainer" class="kraken-bar-container">
+            <div class="hud-row" style="color: #f87171;">
                 <span>🦑 THE KRAKEN</span>
                 <span id="krakenHpText">100%</span>
             </div>
-            <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-red-900">
-                <div id="krakenHpBar" class="bg-red-600 h-full w-full transition-all duration-200"></div>
+            <div class="hud-bar-bg" style="background-color: #020617; border-color: #7f1d1d;">
+                <div id="krakenHpBar" class="hud-bar-fill" style="background-color: #dc2626;"></div>
             </div>
         </div>
 
-        <!-- Dialogue / Story Overlay Popups -->
-        <!-- Welcome Popup -->
-        <div id="start" class="absolute inset-x-4 bottom-4 sm:bottom-8 bg-slate-900/95 border-2 border-amber-500/80 p-4 rounded-xl shadow-2xl modal-bg flex flex-col sm:flex-row items-center justify-between gap-3 pointer-events-auto">
-            <div class="flex items-start gap-3">
-                <span class="text-3xl">🧭</span>
+        <!-- Dialogue Overlays -->
+        <!-- Start Popup -->
+        <div id="start" class="dialogue-box">
+            <div class="dialogue-content">
+                <span class="dialogue-icon">🧭</span>
                 <div>
-                    <h3 class="font-bold text-amber-400 text-sm sm:text-base">Stranded on Mystery Island!</h3>
-                    <p class="text-xs text-slate-300 mt-1">Chop trees (`I`) for wood and apples (`E` to eat). Collect 50 logs to build a shelter on the left coast, then talk to the NPC.</p>
+                    <h3 class="dialogue-title">Stranded on Mystery Island!</h3>
+                    <p class="dialogue-text">Chop trees (press <span style="text-decoration: underline;">I</span>) for wood & apples. Collect 50 logs, move to the left shore to build a shelter, then speak with the NPC.</p>
                 </div>
             </div>
-            <button onclick="closeText()" class="custom-btn px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-xs shrink-0">
+            <button onclick="closeText()" class="btn btn-amber" style="white-space: nowrap;">
                 Start Game [X]
             </button>
         </div>
 
-        <!-- NPC Conversation 1 (After shelter built) -->
-        <div id="ttnpc1" class="absolute inset-x-4 bottom-4 bg-slate-900/95 border-2 border-emerald-500 p-4 rounded-xl modal-bg hidden flex-col sm:flex-row items-center justify-between gap-3 pointer-events-auto">
-            <div class="flex items-center gap-3">
-                <span class="text-3xl">🧙‍♂️</span>
+        <!-- NPC Conversation 1 -->
+        <div id="ttnpc1" class="dialogue-box hidden" style="border-color: #10b981;">
+            <div class="dialogue-content">
+                <span class="dialogue-icon">🧙‍♂️</span>
                 <div>
-                    <h3 class="font-bold text-emerald-400 text-sm">Island Survivor:</h3>
-                    <p class="text-xs text-slate-200 mt-1">"Impressive shelter! Here, take these extra logs (+89 logs). Now build a sturdy ship on the shoreline to escape!"</p>
+                    <h3 class="dialogue-title" style="color: #34d399;">Island Survivor:</h3>
+                    <p class="dialogue-text">"Great job building that shelter! Take these supplies (+89 logs). Now build a flagship on the south shore to escape!"</p>
                 </div>
             </div>
-            <button onclick="closeText()" class="custom-btn px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-lg text-xs shrink-0">
+            <button onclick="closeText()" class="btn btn-emerald" style="white-space: nowrap;">
                 Close [X]
             </button>
         </div>
 
-        <!-- NPC Conversation 2 (No Shelter yet) -->
-        <div id="ttnpc2" class="absolute inset-x-4 bottom-4 bg-slate-900/95 border-2 border-sky-500 p-4 rounded-xl modal-bg hidden flex-col sm:flex-row items-center justify-between gap-3 pointer-events-auto">
-            <div class="flex items-center gap-3">
-                <span class="text-3xl">🧙‍♂️</span>
+        <!-- NPC Conversation 2 -->
+        <div id="ttnpc2" class="dialogue-box hidden" style="border-color: #38bdf8;">
+            <div class="dialogue-content">
+                <span class="dialogue-icon">🧙‍♂️</span>
                 <div>
-                    <h3 class="font-bold text-sky-400 text-sm">Island Survivor:</h3>
-                    <p class="text-xs text-slate-200 mt-1">"Hey friend! Build a shelter on the west side of the island first (Needs 50 logs). Come back when you're done!"</p>
+                    <h3 class="dialogue-title" style="color: #38bdf8;">Island Survivor:</h3>
+                    <p class="dialogue-text">"Welcome friend! First build a shelter on the left side of the island (Requires 50 logs). Come talk to me when it's done!"</p>
                 </div>
             </div>
-            <button onclick="closeText()" class="custom-btn px-4 py-2 bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold rounded-lg text-xs shrink-0">
+            <button onclick="closeText()" class="btn" style="white-space: nowrap; background-color: #0284c7;">
                 Close [X]
             </button>
         </div>
 
         <!-- Not Enough Logs Banner -->
-        <div id="nel" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-red-950/90 border border-red-500 text-red-200 px-4 py-3 rounded-xl backdrop-blur hidden text-center shadow-2xl pointer-events-auto">
-            <p class="font-bold text-sm">⚠️ Need More Logs!</p>
-            <p class="text-xs mt-1">Keep chopping trees with <span class="underline">I</span> key.</p>
-            <button onclick="closeText()" class="mt-2 px-3 py-1 bg-red-800 hover:bg-red-700 text-white rounded text-xs">Dismiss [X]</button>
+        <div id="nel" class="banner-alert">
+            <p style="font-weight: bold; font-size: 13px;">⚠️ Need More Logs!</p>
+            <p style="font-size: 11px; margin-top: 4px;">Chopping trees grants logs & apples.</p>
+            <button onclick="closeText()" class="btn btn-red" style="margin: 8px auto 0 auto; padding: 4px 8px;">Dismiss [X]</button>
         </div>
 
-        <!-- Game Over Screen -->
-        <div id="gameOverModal" class="absolute inset-0 bg-red-950/90 backdrop-blur-md hidden flex-col items-center justify-center p-6 text-center z-20 pointer-events-auto">
-            <span class="text-5xl mb-2">💀</span>
-            <h2 class="pixel-font text-2xl text-red-500 mb-2">YOU DIED</h2>
-            <p id="gameOverReason" class="text-sm text-slate-300 max-w-md mb-6">Starvation claimed your life on the island.</p>
-            <button onclick="location.reload()" class="custom-btn px-6 py-3 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg text-sm">
+        <!-- Game Over Modal -->
+        <div id="gameOverModal" class="modal-overlay hidden">
+            <span style="font-size: 48px; margin-bottom: 8px;">💀</span>
+            <h2 class="pixel-font" style="color: #ef4444; font-size: 20px; margin-bottom: 8px;">YOU DIED</h2>
+            <p id="gameOverReason" style="font-size: 13px; color: #cbd5e1; margin-bottom: 20px; max-width: 320px;">Starvation claimed your life on the island.</p>
+            <button onclick="location.reload()" class="btn btn-red" style="padding: 10px 20px;">
                 🔄 Play Again
             </button>
         </div>
 
-        <!-- Victory Screen -->
-        <div id="victoryModal" class="absolute inset-0 bg-slate-950/95 backdrop-blur-md hidden flex-col items-center justify-center p-6 text-center z-20 pointer-events-auto">
-            <span class="text-6xl mb-3">👑</span>
-            <h2 class="pixel-font text-xl sm:text-2xl text-amber-400 mb-3">KRAKEN DEFEATED!</h2>
-            <p class="text-sm text-slate-300 max-w-md mb-6">You survived the island, constructed a flagship, and vanquished the ancient sea terror!</p>
-            <button onclick="location.reload()" class="custom-btn px-6 py-3 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-sm">
-                🏆 Play Again
+        <!-- Victory Modal -->
+        <div id="victoryModal" class="modal-overlay hidden" style="background: rgba(2, 6, 23, 0.95);">
+            <span style="font-size: 56px; margin-bottom: 12px;">👑</span>
+            <h2 class="pixel-font" style="color: #fbbf24; font-size: 18px; margin-bottom: 12px;">KRAKEN DEFEATED!</h2>
+            <p style="font-size: 13px; color: #cbd5e1; margin-bottom: 20px; max-width: 340px;">You survived the island, constructed a flagship, and vanquished the ancient terror of the sea!</p>
+            <button onclick="location.reload()" class="btn btn-amber" style="padding: 10px 20px;">
+                🏆 Victory Play Again
             </button>
         </div>
     </main>
 
-    <!-- On-Screen Controls & Mobile Buttons -->
-    <footer class="w-full max-w-4xl mt-3 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <!-- D-Pad Controls -->
-        <div class="grid grid-cols-3 gap-1.5 w-36 h-28 sm:w-40 sm:h-32 shrink-0">
+    <!-- Controls Footer -->
+    <footer>
+        <!-- D-Pad -->
+        <div class="dpad-container">
             <div></div>
-            <button onmousedown="moveup()" ontouchstart="moveup()" class="bg-slate-800 hover:bg-slate-700 active:bg-amber-500 text-white font-bold rounded-lg border border-slate-700 flex items-center justify-center text-lg">▲</button>
+            <button onmousedown="moveup()" ontouchstart="moveup()" class="dpad-btn">▲</button>
             <div></div>
-            <button onmousedown="moveleft()" ontouchstart="moveleft()" class="bg-slate-800 hover:bg-slate-700 active:bg-amber-500 text-white font-bold rounded-lg border border-slate-700 flex items-center justify-center text-lg">◄</button>
-            <button onmousedown="movedown()" ontouchstart="movedown()" class="bg-slate-800 hover:bg-slate-700 active:bg-amber-500 text-white font-bold rounded-lg border border-slate-700 flex items-center justify-center text-lg">▼</button>
-            <button onmousedown="moveright()" ontouchstart="moveright()" class="bg-slate-800 hover:bg-slate-700 active:bg-amber-500 text-white font-bold rounded-lg border border-slate-700 flex items-center justify-center text-lg">►</button>
+            <button onmousedown="moveleft()" ontouchstart="moveleft()" class="dpad-btn">◄</button>
+            <button onmousedown="movedown()" ontouchstart="movedown()" class="dpad-btn">▼</button>
+            <button onmousedown="moveright()" ontouchstart="moveright()" class="dpad-btn">►</button>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="flex flex-wrap items-center justify-center gap-2 w-full sm:w-auto">
-            <button onclick="interaction()" class="custom-btn px-3 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg text-xs sm:text-sm flex items-center gap-1.5">
+        <!-- Actions -->
+        <div class="action-buttons">
+            <button onclick="interaction()" class="btn btn-emerald">
                 🪓 <span>Interact [I]</span>
             </button>
-            <button onclick="eat()" class="custom-btn px-3 py-2.5 bg-red-600 hover:bg-red-500 text-white font-bold rounded-lg text-xs sm:text-sm flex items-center gap-1.5">
+            <button onclick="eat()" class="btn btn-red">
                 🍎 <span>Eat Apple [E]</span>
             </button>
-            <button onclick="boardShipAction()" class="custom-btn px-3 py-2.5 bg-amber-600 hover:bg-amber-500 text-white font-bold rounded-lg text-xs sm:text-sm flex items-center gap-1.5">
+            <button onclick="boardShipAction()" class="btn btn-amber">
                 ⛵ <span>Board Ship [C]</span>
             </button>
-            <button id="attackBtn" onclick="attackKraken()" class="custom-btn px-3 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-lg text-xs sm:text-sm flex items-center gap-1.5 hidden">
-                ⚔️ <span>Cannon Attack [Space]</span>
+            <button id="attackBtn" onclick="attackKraken()" class="btn btn-indigo hidden">
+                ⚔️ <span>Fire Cannon [Space]</span>
             </button>
         </div>
     </footer>
 
-    <!-- Help Modal -->
-    <div id="helpModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-md w-full shadow-2xl">
-            <h2 class="text-xl font-bold text-amber-400 mb-4 flex items-center gap-2">📜 Game Guide & Keys</h2>
-            <div class="space-y-2 text-xs sm:text-sm text-slate-300">
-                <p><span class="font-bold text-amber-300">W/A/S/D or Arrow Keys:</span> Move character around island.</p>
-                <p><span class="font-bold text-amber-300">I Key:</span> Interact with trees (chop wood), speak with NPC, build shelter & ship.</p>
-                <p><span class="font-bold text-amber-300">E Key:</span> Eat apples to replenish hunger (+5 hunger per apple).</p>
-                <p><span class="font-bold text-amber-300">C Key:</span> Board ship once constructed.</p>
-                <p><span class="font-bold text-amber-300">Spacebar:</span> Fire ship cannons during Kraken Boss Fight in Level 2.</p>
-                <p><span class="font-bold text-amber-300">X Key:</span> Close active dialogue/text overlay.</p>
+    <!-- Help Popup -->
+    <div id="helpModal" class="fixed-popup">
+        <div class="popup-card">
+            <h2 style="font-size: 16px; font-weight: bold; color: #fbbf24; margin-bottom: 12px;">📜 Game Guide & Keys</h2>
+            <div style="font-size: 12px; color: #cbd5e1; display: flex; flex-direction: column; gap: 8px;">
+                <p><strong style="color: #fde68a;">W/A/S/D or Arrow Keys:</strong> Move character around.</p>
+                <p><strong style="color: #fde68a;">I Key:</strong> Interact (Chop trees, talk to NPC, build shelter/ship).</p>
+                <p><strong style="color: #fde68a;">E Key:</strong> Eat apples to restore hunger (+15 hunger).</p>
+                <p><strong style="color: #fde68a;">C Key:</strong> Board ship when constructed.</p>
+                <p><strong style="color: #fde68a;">Spacebar:</strong> Fire ship cannons at Kraken in Level 2.</p>
+                <p><strong style="color: #fde68a;">X Key:</strong> Close dialogue windows.</p>
             </div>
-            <button onclick="toggleHelpModal()" class="mt-6 w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold rounded-lg text-xs">
-                Close Guide
-            </button>
+            <button onclick="toggleHelpModal()" class="btn" style="width: 100%; margin-top: 20px;">Close Guide</button>
         </div>
     </div>
 
-    <!-- Dev Console Cheat Modal -->
-    <div id="devModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 rounded-2xl p-6 max-w-sm w-full shadow-2xl">
-            <h2 class="text-lg font-bold text-sky-400 mb-3 flex items-center gap-2">💻 Developer Console</h2>
-            <p class="text-xs text-slate-400 mb-3">Enter cheat code or quick trigger functions:</p>
-            <input type="text" id="cheatcode" placeholder="Enter cheat code..." class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-white mb-3 focus:outline-none focus:border-sky-500">
-            <div class="flex gap-2">
-                <button onclick="cheatdonebutton()" class="flex-1 py-2 bg-sky-600 hover:bg-sky-500 text-white font-bold rounded-lg text-xs">
-                    Apply Cheat
-                </button>
-                <button onclick="toggleDevTools()" class="px-4 py-2 bg-slate-800 text-slate-300 font-bold rounded-lg text-xs">
-                    Cancel
-                </button>
+    <!-- Dev Console Popup -->
+    <div id="devModal" class="fixed-popup">
+        <div class="popup-card">
+            <h2 style="font-size: 16px; font-weight: bold; color: #38bdf8; margin-bottom: 12px;">💻 Developer Console</h2>
+            <input type="text" id="cheatcode" placeholder="Enter cheat code (e.g. logs, god, ship)" style="width: 100%; background: #020617; border: 1px solid #334155; border-radius: 6px; padding: 8px; color: #fff; font-size: 12px; margin-bottom: 12px;">
+            <div style="display: flex; gap: 8px;">
+                <button onclick="cheatdonebutton()" class="btn" style="flex: 1; background-color: #0284c7; color: #fff;">Apply</button>
+                <button onclick="toggleDevTools()" class="btn">Cancel</button>
             </div>
         </div>
     </div>
+    </body>
+</html>
