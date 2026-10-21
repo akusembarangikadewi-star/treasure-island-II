@@ -1,379 +1,557 @@
-let x = 600; 
-let y = 200;
-let conversation = 0;
-let nol = 0;//Number Of Logs
-let shelter = 0;
-let el = 0;//Enough Logs
-let ship = 0;
-let as = 0;//Abourdboard Ship
-let ts = 0;//tree sapling
-let hungerjs = 100;
-let healthjs = 100;
-let HR = false;
-let food = 0;
-let l2 = 0;
-//bark.top = 120
-//bark.left = 710
-//leaf.top = 110
-//leaf.left = 700
-//fl2 = fight in level 2
+ /* --- GAME ENGINE & STATE VARIABLES --- */
+        let x = 600; 
+        let y = 200;
+        let conversation = 0;
+        let nol = 0; // Number Of Logs
+        let shelter = 0;
+        let el = 0; // Enough Logs
+        let ship = 0;
+        let as = 0; // Aboard Ship
+        let ts = 0; // tree sapling
+        let hungerjs = 100;
+        let healthjs = 100;
+        let HR = false; // Hunger Running
+        let food = 0; // Apple count
+        let l2 = 0; // Level 2 state
 
-let l = 0;//tree spawn repeat
-let barkclonex = 710;
-let leafclonex = 700;
-let saplingclonex = 710; // Add sapling starting X coordinate
+        // Trees setup (3 trees with bark, leaves, sapling status)
+        let trees = [
+            { x: 710, y: 120, chopped: false, timer: null },
+            { x: 740, y: 120, chopped: false, timer: null },
+            { x: 770, y: 120, chopped: false, timer: null }
+        ];
 
-const bark1 = document.getElementById('bark1');
-const leaf1 = document.getElementById('leaf1');
-const sapling1 = document.getElementById('sapling1'); // Grab the first sapling
+        // NPC position
+        let npcX = 680;
+        let npcY = 180;
 
-while (l < 2) {
-    const barkclone = bark1.cloneNode(true);
-    const leafclone = leaf1.cloneNode(true);
-    const saplingclone = sapling1.cloneNode(true); // Clone the sapling
+        // Level 2 Kraken Stats
+        let krakenHp = 100;
+        let krakenX = 480;
+        let krakenY = 180;
+        let krakenActive = false;
+        let tentacles = [];
+        let krakenAttackTimer = null;
 
-    barkclonex += 30;
-    leafclonex += 30;
-    saplingclonex += 30; 
-
-    barkclone.style.left = barkclonex + "px";
-    leafclone.style.left = leafclonex + "px";
-    saplingclone.style.left = saplingclonex + "px"; // Move the cloned sapling
-
-    barkclone.removeAttribute("id");
-    leafclone.removeAttribute("id");
-    saplingclone.removeAttribute("id"); // Remove ID so clones don't share it
-
-    bark1.parentElement.appendChild(barkclone);
-    leaf1.parentElement.appendChild(leafclone);
-    sapling1.parentElement.appendChild(saplingclone); // Add to the screen
-
-    l++;
-}
-function moveleft() {
-  const player = document.querySelector('.player');
-  x = x - 10;
-  player.style.left = x + "px";
-
-  if (as == 0) {
-  if (x < 500) { 
-    x = x + 10;
-    player.style.left = x + "px";
-    }
-  }
-}
-
-function moveright() {
-  const player = document.querySelector('.player');
-  x = x + 10;
-  player.style.left = x + "px";
-
-  if (x > 800) { 
-    x = x - 10;
-    player.style.left = x + "px";
-  }
-}
-
-function moveup() {
-  const player = document.querySelector('.player');
-  y = y - 10;
-  player.style.top = y + "px";
-
-  if (y < 51) { 
-    y = y + 10;
-    player.style.top = y + "px";
-  }
-}
-
-function movedown() {
-  const player = document.querySelector('.player');
-  y = y + 10;
-  player.style.top = y + "px";
-  
-  if (as == 0) {
-  if (y > 461) { 
-    y = y - 10;
-    player.style.top = y + "px";
-    }
-  }
-}
-
-document.addEventListener("keydown", function(event) {
-    // A switch statement is useful for handling multiple specific keys
-    switch (event.key) {
-        case "ArrowUp":
-            moveup()
-            break;
-		case "w" :
-		moveup()
-		break;
-        case "ArrowDown":
-            movedown()
-            break;
-		case "s" :
-		movedown()
-		break;
-        case "ArrowLeft":
-            moveleft()
-            break;
-		case "a":
-		moveleft()
-		break;
-        case "ArrowRight":
-            moveright()
-            break;
-		case "d":
-		moveright()
-		break;
-	    case "i" :
-            interaction()
-            break;
-        case "x":
-            closeText()
-            break;	
-		case "c":
-		if (ship == 1) {
-	    if (el == 1) {
-		as = 1;
-		}
-      }	 
-		break;
-        case "Enter":
-		cheatdonebutton()
-		break;
-		case "e":
-		eat()
-		break;
-		
-		case "Shift":
-		document.querySelector('.player').style.transition = 0.2;
-		break;
-   }
-});
-
-function closeText() {
-  if (x == 600 && y == 200) {
-    document.querySelector('#start').style.display = 'none'; 
-    
-    if (HR == false) {
-      startHunger(); 
-      HR = true;
-    }
-	
-  } 
-
-  if (conversation == 1 ) {
-    document.querySelector('#ttnpc1').style.display = 'none';
-  }
-  
-  if (nol < 100) {
-    document.querySelector('#ttnpc2').style.display = 'none';
-  }
-  
-  if (nol < 100) {
-    document.querySelector('#nel').style.display = 'none';
-  }
-}
-  //hunger code
-function startHunger() {
-let timer = setInterval(() => {
-  hungerjs -= 1;
-  document.querySelector('#NOH').innerText = hungerjs;
-
-  // Stop the timer if the variable reaches 0 or goes below
-  if (hungerjs <= 0) {
-    clearInterval(timer);
-	startHealth();
-  }
- }, 10000);
-}
-function startHealth() {
-	let timer = setInterval(() => {
-		healthjs -= 10;
-		document.querySelector('#NOHE').innerText = healthjs;
-  // Stop the timer if the variable reaches 0 or goes below
-  if (healthjs <= 0) {
-    clearInterval(timer);
-	
-  }
- }, 1000);
-}
-
-
-  //interaction LOGIC
-function interaction() {
-  const barks = document.querySelectorAll('.bark');
-  const leafs = document.querySelectorAll('.leaf');
-  const saplings = document.querySelectorAll('.sapling'); // Grab ALL saplings
-  
-  const npc = document.querySelector('.NPC');
-  const ttnpc = document.querySelector('#ttnpc1');
-  const ttnpc2 = document.querySelector('#ttnpc2');
-  
-  const playerx = document.querySelector('.player').getBoundingClientRect().left;
-  const playery = document.querySelector('.player').getBoundingClientRect().top; 
-  
-  const npcleft = npc.getBoundingClientRect().left;
-  const npctop = npc.getBoundingClientRect().top;
-
-  // TREE LOGIC
-  for (let i = 0; i < barks.length; i++) {
-      let currentBark = barks[i];
-      let currentLeaf = leafs[i];
-      let currentSapling = saplings[i]; // Find the matching sapling!
-      
-      let barkleft = currentBark.getBoundingClientRect().left;
-      let barktop  = currentBark.getBoundingClientRect().top;
-
-      if (Math.abs(playerx - barkleft) < 20 && Math.abs(playery - barktop) < 20) {
-          
-          if (currentBark.style.display !== 'none') { 
-              currentBark.style.display = 'none';
-              currentLeaf.style.display = 'none';
-
-              // We don't need to move the sapling anymore, just reveal it!
-              currentSapling.style.display = 'block'; 
-              
-              document.querySelector('#log').style.display = 'block';
-
-              nol += 2;
-              document.querySelector('#NOL').innerText = nol;
-			  food += 2;
-			  document.querySelector('#NOA').innerText = food;
-			  document.querySelector('#apple').style.display = 'block';
-
-              setTimeout(() => {
-                  currentBark.style.display = 'block';
-                  currentLeaf.style.display = 'block';
-                  currentSapling.style.display = 'none'; // Hide this specific sapling
-              }, 10000);
-              
-              break; 
-          }
-      }
-  }
-  // NPC LOGIC
- if (conversation == 0) {
-    if (
-	Math.abs(playerx - npcleft) < 30 &&
-	Math.abs(playery - npctop) < 30
-	) {
-        if (el == 1) {
-          conversation = 1; 
-          ttnpc.style.display = 'block';
-          document.getElementById('NOL').innerText = nol;
-          setTimeout(() => {			
-            npc.style.left = 630 + "px";
-            npc.style.top = 111 + "px";
-			nol += 89;
-			document.getElementById('NOL').innerText = nol;
-          }, 7000);
-        } else if (el == 0) { 
-          ttnpc2.style.display = 'block';
+        // Canvas Setup
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        function resizeCanvas() {
+            canvas.width = 900;
+            canvas.height = 506;
         }
-      }
-    }
+        resizeCanvas();
 
-  // SHELTER LOGIC
-   if (shelter == 0) {
-    if (playerx < 550 && playerx > 490) {
-      if (playery < 441 && playery > 111) { 
-        if (nol >= 50) {
-          nol -= 50;
-          document.getElementById('NOL').innerText = nol;
-          el += 1;
-          document.getElementById('shelter').style.width = '120px';
-        } else if (nol < 50) {
-          document.getElementById('nel').style.display = 'block';	
-        }	
-      }
-    }
-  }
-  //ship LOGIC
-   if (playery < 481 && playery > 451) {
-    if ( playerx > 461 && playerx < 541) {
-		if (nol >= 100) {
-		nol -= 100;
-		document.querySelector('#NOL').innerText = nol;
-		document.querySelector('#ship').style.width = '180px';
-		document.querySelector('.NPC').style.left = '570px';
-		document.querySelector('.NPC').style.top = '521px';
-		as = 1
-		document.querySelector('.player').style.top = '521px'
-		document.querySelector('.player').style.left = '540px';
-		setTimeout(() => {
-		level2()
-		}, 10000);
-	  }
-	}
-  }
+        /* --- MOVEMENT LOGIC --- */
+        function moveleft() {
+            const step = 12;
+            x -= step;
+            if (as === 0 && x < 500) {
+                x += step;
+            }
+        }
 
-}
+        function moveright() {
+            const step = 12;
+            x += step;
+            if (x > 800) {
+                x -= step;
+            }
+        }
 
-function eat() {
-	const hunger = document.querySelector('#NOH');
-	const apple = document.querySelector('#NOA');
-	if (food > 0) {
-		if (hungerjs < 96) {
-	food -= 1;
-	apple.innerText = food;
-	hungerjs += 5;
-	hunger.innerText = hungerjs;
-		}
-	}
-}
+        function moveup() {
+            const step = 12;
+            y -= step;
+            if (y < 51) {
+                y += step;
+            }
+        }
 
- function devtools() {
-	const playerx = document.querySelector('.player').getBoundingClientRect().left
-	const playery = document.querySelector('.player').getBoundingClientRect().top
-	document.getElementById('cheatcode').style.display = 'block'
-	document.querySelector('#cheatbutton').style.display = 'block'
-	console.log(playerx)
-	console.log(playery)
-	as = 1;
-}
+        function movedown() {
+            const step = 12;
+            y += step;
+            if (as === 0 && y > 461) {
+                y -= step;
+            }
+        }
 
-function cheatdonebutton() {
-	const cheatcode = document.getElementById('cheatcode');
-	if (cheatcode.value == "logasdfghjkl;'") {
-		nol += 100;
-		document.querySelector('#NOL').innerText = nol;
-		document.querySelector('#log').style.display = 'block';
-	}
-}
+        /* --- KEYBOARD CONTROLS --- */
+        document.addEventListener("keydown", function(event) {
+            switch (event.key) {
+                case "ArrowUp":
+                case "w":
+                case "W":
+                    moveup();
+                    break;
+                case "ArrowDown":
+                case "s":
+                case "S":
+                    movedown();
+                    break;
+                case "ArrowLeft":
+                case "a":
+                case "A":
+                    moveleft();
+                    break;
+                case "ArrowRight":
+                case "d":
+                case "D":
+                    moveright();
+                    break;
+                case "i":
+                case "I":
+                    interaction();
+                    break;
+                case "x":
+                case "X":
+                    closeText();
+                    break;  
+                case "c":
+                case "C":
+                    boardShipAction();
+                    break;
+                case "e":
+                case "E":
+                    eat();
+                    break;
+                case " ":
+                    attackKraken();
+                    break;
+                case "Enter":
+                    cheatdonebutton();
+                    break;
+            }
+        });
 
-function level2() {
-    // Hide the island and shelter
-    document.querySelector('#island').style.display = 'none';
-    document.querySelector('#shelter').style.display = 'none';
-	document.querySelector('#stone').style.display = 'none';
-	
-    // Hide all bark elements (including clones since querySelectorAll targets all matches)
-    const barks = document.querySelectorAll('.bark');
-    barks.forEach(bark => {
-        bark.style.display = 'none';
-    });
+        /* --- HUD & DIALOGUE LOGIC --- */
+        function updateUI() {
+            document.getElementById('NOL').innerText = nol;
+            document.getElementById('NOA').innerText = food;
+            document.getElementById('NOH').innerText = hungerjs;
+            document.getElementById('NOHE').innerText = healthjs;
 
-    // Hide all leaf elements (including clones)
-    const leafs = document.querySelectorAll('.leaf');
-    leafs.forEach(leaf => {
-        leaf.style.display = 'none';
-    });
-	
-	setTimeout(() => {
-		l2 += 1;
-		document.querySelector('.player').style.top = '200px';
-		document.querySelector('.NPC').style.top = '200px';
-		document.querySelector('#ship').style.top = '190px';
-	}, 2000);
-	
-	setTimeout(() => {
-	fl2()
-	}, 10000);
-}
+            document.getElementById('hpBar').style.width = Math.max(0, healthjs) + '%';
+            document.getElementById('hungerBar').style.width = Math.max(0, hungerjs) + '%';
 
-function fl2() {
-	document.querySelector('#kraken').style.top = '180px';
-	document.querySelector('#kraken').style.left = '480px';
-	//next is the kraken's tenticals
-}
+            if (l2 === 1) {
+                document.getElementById('krakenBarContainer').style.display = 'flex';
+                document.getElementById('krakenHpBar').style.width = Math.max(0, krakenHp) + '%';
+                document.getElementById('krakenHpText').innerText = Math.max(0, krakenHp) + '%';
+            }
+        }
+
+        function closeText() {
+            if (x >= 550 && x <= 650 && y >= 150 && y <= 250) {
+                document.querySelector('#start').style.display = 'none'; 
+                if (!HR) {
+                    startHunger(); 
+                    HR = true;
+                }
+            } 
+
+            if (conversation === 1) {
+                document.querySelector('#ttnpc1').style.display = 'none';
+            }
+            if (nol < 100) {
+                document.querySelector('#ttnpc2').style.display = 'none';
+                document.querySelector('#nel').style.display = 'none';
+            }
+        }
+
+        /* --- TIMERS & SURVIVAL MECHANICS --- */
+        let hungerInterval = null;
+        let healthInterval = null;
+
+        function startHunger() {
+            hungerInterval = setInterval(() => {
+                if (hungerjs > 0) {
+                    hungerjs -= 1;
+                } else {
+                    if (!healthInterval) startHealth();
+                }
+                updateUI();
+            }, 3000); // Hunger drops every 3 seconds for active gameplay
+        }
+
+        function startHealth() {
+            healthInterval = setInterval(() => {
+                if (hungerjs <= 0) {
+                    healthjs -= 10;
+                    updateUI();
+                    if (healthjs <= 0) {
+                        clearInterval(healthInterval);
+                        clearInterval(hungerInterval);
+                        showGameOver("You died from hunger and exhaustion!");
+                    }
+                }
+            }, 1000);
+        }
+
+        function eat() {
+            if (food > 0 && hungerjs < 100) {
+                food -= 1;
+                hungerjs = Math.min(100, hungerjs + 15);
+                updateUI();
+            }
+        }
+
+        function boardShipAction() {
+            if (ship === 1 && el === 1) {
+                as = 1;
+            }
+        }
+
+        /* --- INTERACTION SYSTEM --- */
+        function interaction() {
+            const playerx = x;
+            const playery = y;
+
+            // 1. TREE LOGIC
+            for (let i = 0; i < trees.length; i++) {
+                let tree = trees[i];
+                if (Math.abs(playerx - tree.x) < 35 && Math.abs(playery - tree.y) < 35) {
+                    if (!tree.chopped) { 
+                        tree.chopped = true;
+                        nol += 2;
+                        food += 2;
+                        updateUI();
+
+                        // Respawn tree after 10s
+                        setTimeout(() => {
+                            tree.chopped = false;
+                        }, 10000);
+                        return; 
+                    }
+                }
+            }
+
+            // 2. NPC LOGIC
+            if (conversation === 0) {
+                if (Math.abs(playerx - npcX) < 45 && Math.abs(playery - npcY) < 45) {
+                    if (el === 1) {
+                        conversation = 1; 
+                        document.querySelector('#ttnpc1').style.display = 'flex';
+                        setTimeout(() => {          
+                            npcX = 630;
+                            npcY = 111;
+                            nol += 89;
+                            updateUI();
+                        }, 2000);
+                    } else { 
+                        document.querySelector('#ttnpc2').style.display = 'flex';
+                    }
+                    return;
+                }
+            }
+
+            // 3. SHELTER LOGIC (West coast zone)
+            if (shelter === 0) {
+                if (playerx < 560 && playerx > 480 && playery < 441 && playery > 111) { 
+                    if (nol >= 50) {
+                        nol -= 50;
+                        shelter = 1;
+                        el += 1;
+                        updateUI();
+                    } else {
+                        document.getElementById('nel').style.display = 'block'; 
+                    }
+                    return;
+                }
+            }
+
+            // 4. SHIP LOGIC (South beach zone)
+            if (playery > 420 && playery < 485 && playerx > 460 && playerx < 560) {
+                if (nol >= 100 && ship === 0) {
+                    nol -= 100;
+                    ship = 1;
+                    as = 1;
+                    npcX = 570;
+                    npcY = 460;
+                    y = 460;
+                    x = 540;
+                    updateUI();
+
+                    setTimeout(() => {
+                        level2();
+                    }, 3000);
+                }
+            }
+        }
+
+        /* --- LEVEL 2 & KRAKEN BOSS FIGHT --- */
+        function level2() {
+            l2 = 1;
+            document.getElementById('attackBtn').classList.remove('hidden');
+
+            setTimeout(() => {
+                x = 350;
+                y = 250;
+                npcX = 380;
+                npcY = 250;
+                updateUI();
+            }, 1500);
+
+            setTimeout(() => {
+                fl2();
+            }, 4000);
+        }
+
+        function fl2() {
+            krakenActive = true;
+            krakenX = 650;
+            krakenY = 250;
+            
+            // Spawn tentacles
+            tentacles = [
+                { x: 580, y: 150, active: true },
+                { x: 620, y: 350, active: true },
+                { x: 720, y: 180, active: true },
+                { x: 740, y: 320, active: true }
+            ];
+
+            // Boss attack loop
+            krakenAttackTimer = setInterval(() => {
+                if (krakenActive && healthjs > 0) {
+                    // Boss strikes ship
+                    healthjs -= 8;
+                    updateUI();
+                    if (healthjs <= 0) {
+                        showGameOver("The Kraken destroyed your ship!");
+                    }
+                }
+            }, 3500);
+        }
+
+        function attackKraken() {
+            if (l2 === 1 && krakenActive && krakenHp > 0) {
+                krakenHp -= 12;
+                updateUI();
+
+                if (krakenHp <= 0) {
+                    krakenActive = false;
+                    clearInterval(krakenAttackTimer);
+                    document.getElementById('victoryModal').style.display = 'flex';
+                }
+            }
+        }
+
+        /* --- DEV TOOLS & CHEATS --- */
+        function toggleDevTools() {
+            const dev = document.getElementById('devModal');
+            dev.classList.toggle('hidden');
+        }
+
+        function toggleHelpModal() {
+            const help = document.getElementById('helpModal');
+            help.classList.toggle('hidden');
+        }
+
+        function cheatdonebutton() {
+            const cheatcode = document.getElementById('cheatcode').value;
+            if (cheatcode === "logasdfghjkl;'" || cheatcode === "logs") {
+                nol += 100;
+                updateUI();
+            } else if (cheatcode === "god") {
+                healthjs = 999;
+                hungerjs = 999;
+                updateUI();
+            } else if (cheatcode === "ship") {
+                nol = 200;
+                el = 1;
+                updateUI();
+            }
+            toggleDevTools();
+        }
+
+        function showGameOver(reason) {
+            document.getElementById('gameOverReason').innerText = reason;
+            document.getElementById('gameOverModal').style.display = 'flex';
+        }
+
+        /* --- CANVAS RENDERING LOOP --- */
+        function drawScene() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (l2 === 0) {
+                // LEVEL 1: ISLAND SCENE
+                // Deep Ocean
+                ctx.fillStyle = "#0369a1";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Island Sand Rim
+                ctx.fillStyle = "#fde047";
+                ctx.beginPath();
+                ctx.ellipse(650, 260, 220, 180, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Island Grass Center
+                ctx.fillStyle = "#15803d";
+                ctx.beginPath();
+                ctx.ellipse(650, 260, 190, 150, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Shelter Area / Construction
+                if (shelter === 1) {
+                    ctx.fillStyle = "#78350f";
+                    ctx.fillRect(500, 200, 60, 50);
+                    // Roof
+                    ctx.fillStyle = "#b45309";
+                    ctx.beginPath();
+                    ctx.moveTo(490, 200);
+                    ctx.lineTo(530, 160);
+                    ctx.lineTo(570, 200);
+                    ctx.fill();
+                } else {
+                    // Plot marker
+                    ctx.strokeStyle = "#f59e0b";
+                    ctx.setLineDash([4, 4]);
+                    ctx.strokeRect(500, 200, 60, 50);
+                    ctx.setLineDash([]);
+                }
+
+                // Trees
+                trees.forEach(t => {
+                    if (!t.chopped) {
+                        // Trunk
+                        ctx.fillStyle = "#78350f";
+                        ctx.fillRect(t.x - 4, t.y, 8, 20);
+                        // Foliage
+                        ctx.fillStyle = "#22c55e";
+                        ctx.beginPath();
+                        ctx.arc(t.x, t.y - 5, 16, 0, Math.PI * 2);
+                        ctx.fill();
+                        // Apples on tree
+                        ctx.fillStyle = "#ef4444";
+                        ctx.beginPath();
+                        ctx.arc(t.x - 5, t.y - 5, 3, 0, Math.PI * 2);
+                        ctx.arc(t.x + 4, t.y - 2, 3, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else {
+                        // Sapling / Stump
+                        ctx.fillStyle = "#a16207";
+                        ctx.fillRect(t.x - 2, t.y + 10, 4, 10);
+                        ctx.fillStyle = "#86efac";
+                        ctx.beginPath();
+                        ctx.arc(t.x, t.y + 8, 5, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                });
+
+                // Ship Construction on Shoreline
+                if (ship === 1) {
+                    ctx.fillStyle = "#92400e";
+                    ctx.beginPath();
+                    ctx.arc(520, 460, 30, 0, Math.PI);
+                    ctx.fill();
+                    // Mast
+                    ctx.fillRect(518, 410, 4, 50);
+                    // Sail
+                    ctx.fillStyle = "#f8fafc";
+                    ctx.fillRect(522, 415, 20, 25);
+                }
+
+                // NPC Drawing
+                ctx.fillStyle = "#38bdf8"; // NPC Cloak
+                ctx.beginPath();
+                ctx.arc(npcX, npcY, 12, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = "#fde047"; // Wizard Hat
+                ctx.beginPath();
+                ctx.moveTo(npcX - 10, npcY - 8);
+                ctx.lineTo(npcX, npcY - 24);
+                ctx.lineTo(npcX + 10, npcY - 8);
+                ctx.fill();
+
+            } else {
+                // LEVEL 2: OPEN SEA & KRAKEN
+                // Dynamic Sea Waves
+                ctx.fillStyle = "#0c4a6e";
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Ocean Waves Effect
+                ctx.strokeStyle = "#0284c7";
+                ctx.lineWidth = 2;
+                const time = Date.now() * 0.003;
+                for (let i = 0; i < 6; i++) {
+                    ctx.beginPath();
+                    for (let j = 0; j < canvas.width; j += 20) {
+                        ctx.lineTo(j, 80 + i * 70 + Math.sin(time + j * 0.02) * 8);
+                    }
+                    ctx.stroke();
+                }
+
+                // Player Ship
+                ctx.fillStyle = "#78350f";
+                ctx.beginPath();
+                ctx.ellipse(x, y, 45, 25, 0, 0, Math.PI * 2);
+                ctx.fill();
+                // Deck detail
+                ctx.fillStyle = "#b45309";
+                ctx.fillRect(x - 30, y - 10, 60, 20);
+                // Ship Mast & Flag
+                ctx.fillStyle = "#f8fafc";
+                ctx.fillRect(x - 5, y - 35, 20, 25);
+                ctx.fillStyle = "#475569";
+                ctx.fillRect(x - 7, y - 40, 4, 40);
+
+                // NPC on Ship
+                ctx.fillStyle = "#38bdf8";
+                ctx.beginPath();
+                ctx.arc(npcX, npcY, 8, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Kraken Boss
+                if (krakenActive) {
+                    const kWave = Math.sin(Date.now() * 0.005) * 10;
+                    
+                    // Tentacles
+                    tentacles.forEach((ten, idx) => {
+                        ctx.strokeStyle = "#991b1b";
+                        ctx.lineWidth = 12;
+                        ctx.beginPath();
+                        ctx.moveTo(ten.x, ten.y + kWave);
+                        ctx.quadraticCurveTo(ten.x + 30, ten.y - 40 + kWave, ten.x + Math.sin(time + idx) * 20, ten.y - 60 + kWave);
+                        ctx.stroke();
+                    });
+
+                    // Kraken Head
+                    ctx.fillStyle = "#7f1d1d";
+                    ctx.beginPath();
+                    ctx.ellipse(krakenX, krakenY + kWave, 50, 65, 0, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    // Kraken Glowing Eyes
+                    ctx.fillStyle = "#facc15";
+                    ctx.beginPath();
+                    ctx.arc(krakenX - 18, krakenY - 10 + kWave, 8, 0, Math.PI * 2);
+                    ctx.arc(krakenX + 18, krakenY - 10 + kWave, 8, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    ctx.fillStyle = "#000000";
+                    ctx.beginPath();
+                    ctx.arc(krakenX - 18, krakenY - 10 + kWave, 3, 0, Math.PI * 2);
+                    ctx.arc(krakenX + 18, krakenY - 10 + kWave, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // PLAYER CHARACTER DRAWING
+            ctx.fillStyle = "#ef4444"; // Player Body
+            ctx.beginPath();
+            ctx.arc(x, y, 10, 0, Math.PI * 2);
+            ctx.fill();
+            // Player Head
+            ctx.fillStyle = "#fca5a5";
+            ctx.beginPath();
+            ctx.arc(x, y - 4, 6, 0, Math.PI * 2);
+            ctx.fill();
+
+            requestAnimationFrame(drawScene);
+        }
+
+        // Start Loop
+        window.onload = function() {
+            updateUI();
+            drawScene();
+        };
