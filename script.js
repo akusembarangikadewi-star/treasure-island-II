@@ -1,4 +1,4 @@
- /* --- GAME ENGINE & STATE VARIABLES --- */
+/* --- GAME ENGINE & STATE VARIABLES --- */
         let x = 600; 
         let y = 200;
         let conversation = 0;
@@ -10,25 +10,25 @@
         let ts = 0; // tree sapling
         let hungerjs = 100;
         let healthjs = 100;
-        let HR = false; // Hunger Running
-        let food = 0; // Apple count
+        let HR = false; // Hunger Running flag
+        let food = 0; // Food count
         let l2 = 0; // Level 2 state
 
-        // Trees setup (3 trees with bark, leaves, sapling status)
+        // Trees positions & status
         let trees = [
-            { x: 710, y: 120, chopped: false, timer: null },
-            { x: 740, y: 120, chopped: false, timer: null },
-            { x: 770, y: 120, chopped: false, timer: null }
+            { x: 710, y: 120, chopped: false },
+            { x: 740, y: 120, chopped: false },
+            { x: 770, y: 120, chopped: false }
         ];
 
-        // NPC position
+        // NPC Position
         let npcX = 680;
         let npcY = 180;
 
-        // Level 2 Kraken Stats
+        // Kraken Boss State
         let krakenHp = 100;
-        let krakenX = 480;
-        let krakenY = 180;
+        let krakenX = 650;
+        let krakenY = 250;
         let krakenActive = false;
         let tentacles = [];
         let krakenAttackTimer = null;
@@ -76,7 +76,7 @@
             }
         }
 
-        /* --- KEYBOARD CONTROLS --- */
+        /* --- CONTROLS LISTENERS --- */
         document.addEventListener("keydown", function(event) {
             switch (event.key) {
                 case "ArrowUp":
@@ -124,7 +124,7 @@
             }
         });
 
-        /* --- HUD & DIALOGUE LOGIC --- */
+        /* --- UI & HUD LOGIC --- */
         function updateUI() {
             document.getElementById('NOL').innerText = nol;
             document.getElementById('NOA').innerText = food;
@@ -143,7 +143,7 @@
 
         function closeText() {
             if (x >= 550 && x <= 650 && y >= 150 && y <= 250) {
-                document.querySelector('#start').style.display = 'none'; 
+                document.querySelector('#start').classList.add('hidden'); 
                 if (!HR) {
                     startHunger(); 
                     HR = true;
@@ -151,10 +151,10 @@
             } 
 
             if (conversation === 1) {
-                document.querySelector('#ttnpc1').style.display = 'none';
+                document.querySelector('#ttnpc1').classList.add('hidden');
             }
             if (nol < 100) {
-                document.querySelector('#ttnpc2').style.display = 'none';
+                document.querySelector('#ttnpc2').classList.add('hidden');
                 document.querySelector('#nel').style.display = 'none';
             }
         }
@@ -171,7 +171,7 @@
                     if (!healthInterval) startHealth();
                 }
                 updateUI();
-            }, 3000); // Hunger drops every 3 seconds for active gameplay
+            }, 3000);
         }
 
         function startHealth() {
@@ -182,7 +182,7 @@
                     if (healthjs <= 0) {
                         clearInterval(healthInterval);
                         clearInterval(hungerInterval);
-                        showGameOver("You died from hunger and exhaustion!");
+                        showGameOver("Starvation claimed your life on the island!");
                     }
                 }
             }, 1000);
@@ -217,7 +217,6 @@
                         food += 2;
                         updateUI();
 
-                        // Respawn tree after 10s
                         setTimeout(() => {
                             tree.chopped = false;
                         }, 10000);
@@ -231,7 +230,7 @@
                 if (Math.abs(playerx - npcX) < 45 && Math.abs(playery - npcY) < 45) {
                     if (el === 1) {
                         conversation = 1; 
-                        document.querySelector('#ttnpc1').style.display = 'flex';
+                        document.querySelector('#ttnpc1').classList.remove('hidden');
                         setTimeout(() => {          
                             npcX = 630;
                             npcY = 111;
@@ -239,13 +238,13 @@
                             updateUI();
                         }, 2000);
                     } else { 
-                        document.querySelector('#ttnpc2').style.display = 'flex';
+                        document.querySelector('#ttnpc2').classList.remove('hidden');
                     }
                     return;
                 }
             }
 
-            // 3. SHELTER LOGIC (West coast zone)
+            // 3. SHELTER LOGIC
             if (shelter === 0) {
                 if (playerx < 560 && playerx > 480 && playery < 441 && playery > 111) { 
                     if (nol >= 50) {
@@ -260,7 +259,7 @@
                 }
             }
 
-            // 4. SHIP LOGIC (South beach zone)
+            // 4. SHIP LOGIC
             if (playery > 420 && playery < 485 && playerx > 460 && playerx < 560) {
                 if (nol >= 100 && ship === 0) {
                     nol -= 100;
@@ -302,22 +301,19 @@
             krakenX = 650;
             krakenY = 250;
             
-            // Spawn tentacles
             tentacles = [
-                { x: 580, y: 150, active: true },
-                { x: 620, y: 350, active: true },
-                { x: 720, y: 180, active: true },
-                { x: 740, y: 320, active: true }
+                { x: 580, y: 150 },
+                { x: 620, y: 350 },
+                { x: 720, y: 180 },
+                { x: 740, y: 320 }
             ];
 
-            // Boss attack loop
             krakenAttackTimer = setInterval(() => {
                 if (krakenActive && healthjs > 0) {
-                    // Boss strikes ship
                     healthjs -= 8;
                     updateUI();
                     if (healthjs <= 0) {
-                        showGameOver("The Kraken destroyed your ship!");
+                        showGameOver("The Kraken smashed your ship into pieces!");
                     }
                 }
             }, 3500);
@@ -331,20 +327,20 @@
                 if (krakenHp <= 0) {
                     krakenActive = false;
                     clearInterval(krakenAttackTimer);
-                    document.getElementById('victoryModal').style.display = 'flex';
+                    document.getElementById('victoryModal').classList.remove('hidden');
                 }
             }
         }
 
-        /* --- DEV TOOLS & CHEATS --- */
+        /* --- DEV TOOLS & HELP MODAL --- */
         function toggleDevTools() {
             const dev = document.getElementById('devModal');
-            dev.classList.toggle('hidden');
+            dev.style.display = (dev.style.display === 'flex') ? 'none' : 'flex';
         }
 
         function toggleHelpModal() {
             const help = document.getElementById('helpModal');
-            help.classList.toggle('hidden');
+            help.style.display = (help.style.display === 'flex') ? 'none' : 'flex';
         }
 
         function cheatdonebutton() {
@@ -366,36 +362,34 @@
 
         function showGameOver(reason) {
             document.getElementById('gameOverReason').innerText = reason;
-            document.getElementById('gameOverModal').style.display = 'flex';
+            document.getElementById('gameOverModal').classList.remove('hidden');
         }
 
-        /* --- CANVAS RENDERING LOOP --- */
+        /* --- CANVAS RENDER LOOP --- */
         function drawScene() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             if (l2 === 0) {
                 // LEVEL 1: ISLAND SCENE
-                // Deep Ocean
                 ctx.fillStyle = "#0369a1";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                // Island Sand Rim
+                // Island Sand
                 ctx.fillStyle = "#fde047";
                 ctx.beginPath();
                 ctx.ellipse(650, 260, 220, 180, 0, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Island Grass Center
+                // Island Grass
                 ctx.fillStyle = "#15803d";
                 ctx.beginPath();
                 ctx.ellipse(650, 260, 190, 150, 0, 0, Math.PI * 2);
                 ctx.fill();
 
-                // Shelter Area / Construction
+                // Shelter Area
                 if (shelter === 1) {
                     ctx.fillStyle = "#78350f";
                     ctx.fillRect(500, 200, 60, 50);
-                    // Roof
                     ctx.fillStyle = "#b45309";
                     ctx.beginPath();
                     ctx.moveTo(490, 200);
@@ -403,7 +397,6 @@
                     ctx.lineTo(570, 200);
                     ctx.fill();
                 } else {
-                    // Plot marker
                     ctx.strokeStyle = "#f59e0b";
                     ctx.setLineDash([4, 4]);
                     ctx.strokeRect(500, 200, 60, 50);
@@ -413,22 +406,18 @@
                 // Trees
                 trees.forEach(t => {
                     if (!t.chopped) {
-                        // Trunk
                         ctx.fillStyle = "#78350f";
                         ctx.fillRect(t.x - 4, t.y, 8, 20);
-                        // Foliage
                         ctx.fillStyle = "#22c55e";
                         ctx.beginPath();
                         ctx.arc(t.x, t.y - 5, 16, 0, Math.PI * 2);
                         ctx.fill();
-                        // Apples on tree
                         ctx.fillStyle = "#ef4444";
                         ctx.beginPath();
                         ctx.arc(t.x - 5, t.y - 5, 3, 0, Math.PI * 2);
                         ctx.arc(t.x + 4, t.y - 2, 3, 0, Math.PI * 2);
                         ctx.fill();
                     } else {
-                        // Sapling / Stump
                         ctx.fillStyle = "#a16207";
                         ctx.fillRect(t.x - 2, t.y + 10, 4, 10);
                         ctx.fillStyle = "#86efac";
@@ -438,25 +427,23 @@
                     }
                 });
 
-                // Ship Construction on Shoreline
+                // Ship Construction
                 if (ship === 1) {
                     ctx.fillStyle = "#92400e";
                     ctx.beginPath();
                     ctx.arc(520, 460, 30, 0, Math.PI);
                     ctx.fill();
-                    // Mast
                     ctx.fillRect(518, 410, 4, 50);
-                    // Sail
                     ctx.fillStyle = "#f8fafc";
                     ctx.fillRect(522, 415, 20, 25);
                 }
 
                 // NPC Drawing
-                ctx.fillStyle = "#38bdf8"; // NPC Cloak
+                ctx.fillStyle = "#38bdf8";
                 ctx.beginPath();
                 ctx.arc(npcX, npcY, 12, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.fillStyle = "#fde047"; // Wizard Hat
+                ctx.fillStyle = "#fde047";
                 ctx.beginPath();
                 ctx.moveTo(npcX - 10, npcY - 8);
                 ctx.lineTo(npcX, npcY - 24);
@@ -465,11 +452,9 @@
 
             } else {
                 // LEVEL 2: OPEN SEA & KRAKEN
-                // Dynamic Sea Waves
                 ctx.fillStyle = "#0c4a6e";
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-                // Ocean Waves Effect
                 ctx.strokeStyle = "#0284c7";
                 ctx.lineWidth = 2;
                 const time = Date.now() * 0.003;
@@ -486,10 +471,8 @@
                 ctx.beginPath();
                 ctx.ellipse(x, y, 45, 25, 0, 0, Math.PI * 2);
                 ctx.fill();
-                // Deck detail
                 ctx.fillStyle = "#b45309";
                 ctx.fillRect(x - 30, y - 10, 60, 20);
-                // Ship Mast & Flag
                 ctx.fillStyle = "#f8fafc";
                 ctx.fillRect(x - 5, y - 35, 20, 25);
                 ctx.fillStyle = "#475569";
@@ -505,7 +488,6 @@
                 if (krakenActive) {
                     const kWave = Math.sin(Date.now() * 0.005) * 10;
                     
-                    // Tentacles
                     tentacles.forEach((ten, idx) => {
                         ctx.strokeStyle = "#991b1b";
                         ctx.lineWidth = 12;
@@ -515,13 +497,11 @@
                         ctx.stroke();
                     });
 
-                    // Kraken Head
                     ctx.fillStyle = "#7f1d1d";
                     ctx.beginPath();
                     ctx.ellipse(krakenX, krakenY + kWave, 50, 65, 0, 0, Math.PI * 2);
                     ctx.fill();
 
-                    // Kraken Glowing Eyes
                     ctx.fillStyle = "#facc15";
                     ctx.beginPath();
                     ctx.arc(krakenX - 18, krakenY - 10 + kWave, 8, 0, Math.PI * 2);
@@ -536,12 +516,11 @@
                 }
             }
 
-            // PLAYER CHARACTER DRAWING
-            ctx.fillStyle = "#ef4444"; // Player Body
+            // PLAYER CHARACTER
+            ctx.fillStyle = "#ef4444";
             ctx.beginPath();
             ctx.arc(x, y, 10, 0, Math.PI * 2);
             ctx.fill();
-            // Player Head
             ctx.fillStyle = "#fca5a5";
             ctx.beginPath();
             ctx.arc(x, y - 4, 6, 0, Math.PI * 2);
@@ -550,7 +529,6 @@
             requestAnimationFrame(drawScene);
         }
 
-        // Start Loop
         window.onload = function() {
             updateUI();
             drawScene();
