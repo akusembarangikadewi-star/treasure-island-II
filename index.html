@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>trapped in an island</title>
+		<link href="style.css" rel="stylesheet" />
+	</head>
+	<body>
+		<h4 class="player">p</h4>
+		<h4 class="NPC">p</h4>
+		<h1 id="kraken">🐙</h1>
+		<h3 id="ka">∬</h4>
+		<h3 id="stone">🪨</h4>
+		
+		<div id="island"></div>
+		
+    
+    <button onclick="moveleft()" class="button" id="left">⬅️</button>
+    <button onclick="moveright()" class="button" id="right">➡️</button>
+    <button onclick="moveup()" class="button" id="up">⬆️</button>
+    <button onclick="movedown()" class="button" id="down">⬇️</button>
+    <button onclick="closeText()" class="button" id="delete">close</button>
+    <button onclick="interaction()" class="button" id="interaction">interact</button>
+	<div class="items" id="log">🪵   <span id="NOL">0</span></div>
+	<div id="hungerhtml">🍖 <span id="NOH">100</span></div>
+	<div id="healthhtml">🩷  <span id="NOHE">100</span></div>
+	<button onclick="eat()" id="apple">🍎 <span id="NOA">0</span></button>
+	<div id="remotebase"></div>
+	
+	<button onclick="devtools()" class="button" id="devtools">🛠️</button>
+	<button onclick="cheatdonebutton()" class="button" id="cheatbutton">✅</button>
+	
+	
+	
+	
+	
+	<div id="shelter"><br>shelter</div>
+
+    <p id="start" >you are trapped in this island,<br>survive 100 days until help arrives<br>or make a ship then leave</p>
+	<p class="text" id="ttnpc1"> would you like to live in my shelter<br>
+	/really thank you, here is a<br>
+	little gift for you</p>
+	
+    <p class="text" id="ttnpc2"> I don't know that there is any<br>
+	one lives here too/I have lived here quit a while/oh would<br>
+	you like to live in my shelter/but is there any room for me<br>
+	/not really for now</p> 
+	
+	<p class="text" id="level2w"> you have finally <br>leave the island and you are now sailing through the ocean <br> with your friend</p>
+	
+	 
+    <div class="bark" id="bark1" style="left:710px; top:120px;"></div>
+    <div class="leaf" id="leaf1"></div>
+	
+	
+    <marquee id="fish">🐟  🐠  🐡  🦈</marquee>
+	<marquee id="wave"> _______________</marquee>
+	
+	<div class="text" id="nel">you don't have enough logs</div>
+	
+	<input id="cheatcode" placeholder="enter secret code">
+	
+	<div class="sapling" id="sapling1">🌱</div>
+	
+	<div id="ship"></div>
+
+		<script type="text/javascript" src="script.js"></script>
+	</body>
+</html>
